@@ -204,9 +204,9 @@ with gr.Blocks() as demo:
         with gr.Column():
             with gr.Row():
                 with gr.Column():
-                    semantic = gr.Image(value='./test/colormap.png',type="pil", shape=(2048, 2048))
+                    semantic = gr.Image(value='./test/colormap.png',type="pil", shape=(512, 512))
                 with gr.Column():
-                    height = gr.Image(value='./test/heightmap.png', type="pil", shape=(2048, 2048))
+                    height = gr.Image(value='./test/heightmap.png', type="pil", shape=(512, 512))
             with gr.Row():
                 # with gr.Column():
                 #     image = gr.Image(type='pil', shape(540, 960))
