@@ -1,4 +1,3 @@
-import sys
 import os
 import os
 import html
@@ -10,10 +9,8 @@ from tqdm import tqdm
 
 os.system("git clone https://github.com/FrozenBurning/SceneDreamer.git")
 
-import torch
-
 pretrained_model = dict(file_url='https://drive.google.com/uc?id=1IFu1vNrgF1EaRqPizyEgN_5Vt7Fyg0Mj',
-                            alt_url='', file_size=330571863, file_md5='13b7ae859b28b37479ec84f1449d07fc7',
+                            alt_url='', file_size=330571863,
                             file_path='./scenedreamer_released.pt',)
 
 
@@ -106,8 +103,7 @@ from PIL import Image
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Training')
-    parser.add_argument('--config', type=str, default='./configs/scenedreamer_inference.yaml'
-                        help='Path to the training config file.')
+    parser.add_argument('--config', type=str, default='./configs/scenedreamer_inference.yaml', help='Path to the training config file.')
     parser.add_argument('--checkpoint', default='./scenedreamer_released.pt',
                         help='Checkpoint path.')
     parser.add_argument('--output_dir', type=str, default='./test/',
@@ -151,10 +147,11 @@ def get_bev(seed):
     print('[PCGGenerator] Generating BEV scene representation...')
     os.system('python terrain_generator.py --size {} --seed {} --outdir {}'.format(net_G.voxel.sample_size, seed, world_dir))
     heightmap_path = os.path.join(world_dir, 'heightmap.png')
-    semantic_path = os.path.join(world_dir, 'semanticmap.png')
+    semantic_path = os.path.join(world_dir, 'colormap.png')
     heightmap = Image.open(heightmap_path)
     semantic = Image.open(semantic_path)
     return semantic, heightmap
+
 def get_video(seed, num_frames):
     device = torch.device('cuda')
     rng_cuda = torch.Generator(device=device)
@@ -168,13 +165,12 @@ def get_video(seed, num_frames):
     z = torch.empty(1, net_G.style_dims, dtype=torch.float32, device=device)
     z.normal_(generator=rng_cuda)
     net_G.inference_givenstyle(z, current_outdir, **vars(cfg.inference_args))
-    return os.path.join(current_outdir， ‘rgb_render.mp4’)
+    return os.path.join(current_outdir, 'rgb_render.mp4')
 
 markdown=f'''
   # SceneDreamer: Unbounded 3D Scene Generation from 2D Image Collections
   
   Authored by Zhaoxi Chen, Guangcong Wang, Ziwei Liu
-
   ### Useful links:
   - [Official Github Repo](https://github.com/FrozenBurning/SceneDreamer)
   - [Project Page](https://scene-dreamer.github.io/)
@@ -190,17 +186,17 @@ with gr.Blocks() as demo:
         with gr.Column():
             with gr.Row():
                 with gr.Column():
-                    semantic = gr.Image(type="pil",shape=(2048, 2048))
+                    semantic = gr.Image(type="pil", shape=(2048, 2048))
                 with gr.Column():
-                    height = gr.Image(type="pil",shape=(2048, 2048))
+                    height = gr.Image(type="pil", shape=(2048, 2048))
             with gr.Row():
                 # with gr.Column():
                 #     image = gr.Image(type='pil', shape(540, 960))
                 with gr.Column():
                     video=gr.Video()
     with gr.Row():
-      num_frames = gr.Slider(minimum=40, maximum=200, value=40, label='Number of frames for video generation')
-      user_seed = gr.Slider(minimum=0, maximum=999999, value=8888, label='Random seed to control styles and scenes')
+      num_frames = gr.Slider(minimum=10, maximum=200, value=10, label='Number of rendered frames')
+      user_seed = gr.Slider(minimum=0, maximum=999999, value=8888, label='Random seed')
 
     with gr.Row():
         btn = gr.Button(value="Generate BEV")
