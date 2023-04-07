@@ -10,6 +10,7 @@ done
 for p in gancraft/voxlib; do
   cd imaginaire/model_utils/${p};
   make all
+  python -m pip install .
   cd ${CURRENT};
 done
 
