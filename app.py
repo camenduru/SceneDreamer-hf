@@ -8,7 +8,7 @@ import requests
 from tqdm import tqdm
 
 os.system("git clone https://github.com/FrozenBurning/SceneDreamer.git")
-sys.path.append("SceneDreamer")
+os.system("cp -r SceneDreamer/* ./")
 
 pretrained_model = dict(file_url='https://drive.google.com/uc?id=1IFu1vNrgF1EaRqPizyEgN_5Vt7Fyg0Mj',
                             alt_url='', file_size=330571863,
