@@ -9,7 +9,7 @@ from tqdm import tqdm
 
 os.system("git clone https://github.com/FrozenBurning/SceneDreamer.git")
 sys.path.append("SceneDreamer")
-os.system("bash install.sh")
+
 pretrained_model = dict(file_url='https://drive.google.com/uc?id=1IFu1vNrgF1EaRqPizyEgN_5Vt7Fyg0Mj',
                             alt_url='', file_size=330571863,
                             file_path='./scenedreamer_released.pt',)
@@ -88,14 +88,26 @@ with requests.Session() as session:
 
 import os
 import torch
+import torch.nn as nn
+import importlib
 import argparse
 from imaginaire.config import Config
 from imaginaire.utils.cudnn import init_cudnn
-from imaginaire.utils.io import get_checkpoint as get_checkpoint
-from imaginaire.utils.trainer import \
-    (get_model_optimizer_and_scheduler, set_random_seed)
 import gradio as gr
 from PIL import Image
+
+
+class WrappedModel(nn.Module):
+    r"""Dummy wrapping the module.
+    """
+
+    def __init__(self, module):
+        super(WrappedModel, self).__init__()
+        self.module = module
+
+    def forward(self, *args, **kwargs):
+        r"""PyTorch module forward function overload."""
+        return self.module(*args, **kwargs)
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Training')
@@ -111,14 +123,17 @@ def parse_args():
 
 
 args = parse_args()
-set_random_seed(args.seed, by_rank=False)
 cfg = Config(args.config)
 
 # Initialize cudnn.
 init_cudnn(cfg.cudnn.deterministic, cfg.cudnn.benchmark)
 
 # Initialize data loaders and models.
-net_G = get_model_optimizer_and_scheduler(cfg, seed=args.seed, generator_only=True)
+
+lib_G = importlib.import_module(cfg.gen.type)
+net_G = lib_G.Generator(cfg.gen, cfg.data)
+net_G = net_G.to('cuda')
+net_G = WrappedModel(net_G)
 
 if args.checkpoint == '':
     raise NotImplementedError("No checkpoint is provided for inference!")
