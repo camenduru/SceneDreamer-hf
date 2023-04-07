@@ -9,6 +9,7 @@ from tqdm import tqdm
 
 os.system("git clone https://github.com/FrozenBurning/SceneDreamer.git")
 sys.path.append("SceneDreamer")
+
 pretrained_model = dict(file_url='https://drive.google.com/uc?id=1IFu1vNrgF1EaRqPizyEgN_5Vt7Fyg0Mj',
                             alt_url='', file_size=330571863,
                             file_path='./scenedreamer_released.pt',)
@@ -90,14 +91,9 @@ import torch
 import argparse
 from imaginaire.config import Config
 from imaginaire.utils.cudnn import init_cudnn
-from imaginaire.utils.dataset import get_test_dataloader
-from imaginaire.utils.distributed import init_dist
-from imaginaire.utils.gpu_affinity import set_affinity
 from imaginaire.utils.io import get_checkpoint as get_checkpoint
-from imaginaire.utils.logging import init_logging
 from imaginaire.utils.trainer import \
     (get_model_optimizer_and_scheduler, set_random_seed)
-import imaginaire.config
 import gradio as gr
 from PIL import Image
 
