@@ -164,7 +164,7 @@ def get_bev(seed):
     semantic = Image.open(semantic_path)
     return semantic, heightmap
 
-def get_video(seed, num_frames):
+def get_video(seed, num_frames, reso_h, reso_w):
     device = torch.device('cuda')
     rng_cuda = torch.Generator(device=device)
     rng_cuda = rng_cuda.manual_seed(seed)
@@ -172,6 +172,8 @@ def get_video(seed, num_frames):
     torch.cuda.manual_seed(seed)
     net_G.voxel.next_world(device, world_dir, checkpoint)
     cam_mode = cfg.inference_args.camera_mode
+    cfg.inference_args.cam_maxstep = num_frames
+    cfg.inference_args.resolution_hw = [reso_h, reso_w]
     current_outdir = os.path.join(world_dir, 'camera_{:02d}'.format(cam_mode))
     os.makedirs(current_outdir, exist_ok=True)
     z = torch.empty(1, net_G.style_dims, dtype=torch.float32, device=device)
@@ -188,7 +190,11 @@ markdown=f'''
   - [Project Page](https://scene-dreamer.github.io/)
   - [arXiv Link](https://arxiv.org/abs/2302.01330)
   Licensed under the S-Lab License.
-  First use the button "Generate BEV" to randomly sample a 3D world represented by a height map and a semantic map. Then push the button "Render" to generate a camera trajectory flying through the world.
+
+
+  We offer a sampled scene whose BEVs are shown on the right. You can also use the button "Generate BEV" to randomly sample a new 3D world represented by a height map and a semantic map. But it requires a long time. 
+  
+  To render video, push the button "Render" to generate a camera trajectory flying through the world. You can specify rendering options as shown below!
 '''
 
 with gr.Blocks() as demo:
@@ -198,23 +204,25 @@ with gr.Blocks() as demo:
         with gr.Column():
             with gr.Row():
                 with gr.Column():
-                    semantic = gr.Image(type="pil", shape=(2048, 2048))
+                    semantic = gr.Image(value='./test/colormap.png',type="pil", shape=(2048, 2048))
                 with gr.Column():
-                    height = gr.Image(type="pil", shape=(2048, 2048))
+                    height = gr.Image(value='./test/heightmap.png', type="pil", shape=(2048, 2048))
             with gr.Row():
                 # with gr.Column():
                 #     image = gr.Image(type='pil', shape(540, 960))
                 with gr.Column():
-                    video=gr.Video()
+                    video = gr.Video()
     with gr.Row():
-      num_frames = gr.Slider(minimum=10, maximum=200, value=10, label='Number of rendered frames')
-      user_seed = gr.Slider(minimum=0, maximum=999999, value=8888, label='Random seed')
+        num_frames = gr.Slider(minimum=10, maximum=200, value=20, step=1, label='Number of rendered frames')
+        user_seed = gr.Slider(minimum=0, maximum=999999, value=8888, step=1, label='Random seed')
+        resolution_h = gr.Slider(minimum=256, maximum=2160, value=270, step=1, label='Height of rendered image')
+        resolution_w = gr.Slider(minimum=256, maximum=3840, value=480, step=1, label='Width of rendered image')
 
     with gr.Row():
         btn = gr.Button(value="Generate BEV")
         btn_2=gr.Button(value="Render")
 
     btn.click(get_bev,[user_seed],[semantic, height])
-    btn_2.click(get_video,[user_seed, num_frames],[video])
+    btn_2.click(get_video,[user_seed, num_frames, resolution_h, resolution_w], [video])
 
 demo.launch(debug=True)
