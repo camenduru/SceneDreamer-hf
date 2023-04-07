@@ -80,11 +80,11 @@ def download_file(session, file_spec, use_alt_url=False, chunk_size=128, num_att
             pass
 
 print('Downloading SceneDreamer pretrained model...')
-    with requests.Session() as session:
-        try:
-            download_file(session, pretrained_model)
-        except:
-            print('Google Drive download failed.\n')
+with requests.Session() as session:
+    try:
+        download_file(session, pretrained_model)
+    except:
+        print('Google Drive download failed.\n')
 
 
 
