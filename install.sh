@@ -1,4 +1,4 @@
-cd SceneDreamer
+export CUDA_VERSION=$(nvcc --version| grep -Po "(\d+\.)+\d+" | head -1)
 CURRENT=$(pwd)
 for p in correlation channelnorm resample2d bias_act upfirdn2d; do
     cd imaginaire/third_party/${p};
@@ -17,4 +17,3 @@ cd gridencoder
 python setup.py build_ext --inplace
 python -m pip install .
 cd ${CURRENT}
-cd ..
