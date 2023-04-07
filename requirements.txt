@@ -1,5 +1,4 @@
-pytorch==1.9.1
-cudatoolkit==11.1
+torch==1.9.1
 torchvision
 numpy
 scipy
